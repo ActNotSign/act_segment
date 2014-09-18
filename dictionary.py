@@ -41,7 +41,7 @@ class dictionary (object):
     @staticmethod
     def loaddictionary():
         dictionary.loaddefaultdict()
-        # dictionary.loadcustomdict()
+        dictionary.loadcustomdict()
         dictionary.loadsymbolict()
         pass
 
