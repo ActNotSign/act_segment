@@ -3,4 +3,4 @@
 from act import act
 
 act = act()
-print act.segment("中华人民",False)
+print act.segment("中华人",True)

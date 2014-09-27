@@ -20,16 +20,18 @@ class act (object):
 
     def isEnglish(self, __char):
         asciicode = ord(__char)
-        if 97 <= asciicode <= 122 or 65 <= asciicode <= 90 or 48 <= asciicode <= 57:
+        if 97 <= asciicode <= 122 or 65 <= asciicode <= 90 or 48 <= asciicode <= 57 or \
+            32 < asciicode <= 47 or 49 <= asciicode <= 64 or 91 <= asciicode <= 96 or \
+            123 <= asciicode <= 126:
             return True
         else :
             return False
 
-    def isNumber(self, __char):
-        asciicode = ord(__char)
-        if 48 <= asciicode <= 57:
+    def isnumber(self, a):
+        try:
+            float(a)
             return True
-        else :
+        except:
             return False
 
     def segment(self, in_content, in_tagging = True,  space_mark = "    "):
@@ -51,6 +53,7 @@ class act (object):
                     __tagging = __status.get('s')
                 self.string += in_content+"/"+__tagging+"    "
             return
+
         """
             depath
             """
@@ -69,14 +72,17 @@ class act (object):
                 if __tmp_s != None:
                     __tagging = __tmp_s
                 pass
-            else :
+            else:
                 break
             __forward_char = in_content[index-1]
-        if __segment_word.isdigit():
+
+        if self.isnumber(__segment_word):
             __tagging = 'm'
+
         if in_tagging:
             self.string += __segment_word+"/"+__tagging+space_mark
-        else :
+        else:
             self.string += __segment_word+space_mark
-        self.fullmapping(in_content[len(__segment_word):__str_len])
+
+        self.fullmapping(in_content[len(__segment_word):__str_len], in_tagging, space_mark)
         pass

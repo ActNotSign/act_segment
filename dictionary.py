@@ -1,6 +1,6 @@
 #!/usr/bin/env python
 # -*- coding: utf-8 -*-
-import sys,ujson
+import sys,gzip
 from wordtree import wordtree
 reload(sys)
 sys.setdefaultencoding('utf8')
@@ -16,9 +16,8 @@ class dictionary (object):
         load default dictionary
         """
     @staticmethod
-    def loaddefaultdict():
-        for line in open ("./dict/default.dict"):
-            wordtree.tree = ujson.loads(line)
+    def loadcoredict():
+        wordtree.pickload()
         pass
 
     @staticmethod
@@ -40,7 +39,7 @@ class dictionary (object):
 
     @staticmethod
     def loaddictionary():
-        dictionary.loaddefaultdict()
+        dictionary.loadcoredict()
         dictionary.loadcustomdict()
         dictionary.loadsymbolict()
         pass
