@@ -1,6 +1,7 @@
 #!/usr/bin/env python
 # -*- coding: utf-8 -*-
-import sys,time
+
+import sys
 from dictionary import dictionary
 
 reload(sys)
@@ -8,16 +9,20 @@ sys.setdefaultencoding('utf8')
 
 class act (object):
 
+    '''
+        init params
+        '''
     def __init__(self):
-        print 'loading dict'
+        # print 'loading dict'
         dictionary.loaddictionary()
-        print 'over'
-        self.string = ''
+        # print 'over'
+        self.wordmap = []
+        self.wordcode = 'utf-8'
         pass
 
-    def check(self, __tmp_word):
-        return dictionary.check(__tmp_word)
-
+    '''
+        check char
+        '''
     def isEnglish(self, __char):
         asciicode = ord(__char)
         if 97 <= asciicode <= 122 or 65 <= asciicode <= 90 or 48 <= asciicode <= 57 or \
@@ -27,6 +32,9 @@ class act (object):
         else :
             return False
 
+    '''
+        check number
+        '''
     def isnumber(self, a):
         try:
             float(a)
@@ -34,13 +42,59 @@ class act (object):
         except:
             return False
 
-    def segment(self, in_content, in_tagging = True,  space_mark = "    "):
-        print '---------segment-----------'
-        self.string = ""
-        self.fullmapping(in_content.decode("utf-8"),in_tagging, space_mark)
-        return self.string
+    '''
+        precise verification
+        '''
+    def precise(self):
+        __maplen = len(self.wordmap) - 1
+        __ismapping = False
+        for index in range(0, __maplen):
+            __word, __attr = self.wordmap[index]
+            __word = __word.decode(self.wordcode)
+            __wordlen = len(__word)
+            if (index+1) > __maplen or __wordlen < 2:
+                if not __ismapping:
+                    self.wordmap[index] = (__word, __attr)
+                __ismapping = False
+                continue
+            __word2, __attr2 = self.wordmap[index+1]
+            __word2 = __word2.decode(self.wordcode)
+            __checkword = __word[__wordlen-1]+__word2
 
-    def fullmapping(self, in_content,in_tagging = True, space_mark = "    "):
+            __status_check = dictionary.check(__checkword)
+            __status_word = dictionary.check(__word[0:__wordlen-1])
+
+            if __status_check.get('status') and __status_word.get('status'):
+                self.wordmap[index] = (__word[0:__wordlen-1], __status_word.get('s'))
+                self.wordmap[index+1] = (__checkword, __status_check.get('s'))
+                __ismapping = True
+            else:
+                __ismapping = False
+        pass
+
+    '''
+        array to string
+        '''
+    def tostring(self, wordmap, in_tagging=True,  space_mark="    "):
+        __string = ''
+        for word, attr in wordmap:
+            if in_tagging:
+                __string += word+'/'+attr+space_mark
+            else:
+                __string += word+space_mark
+        return __string
+
+    '''
+        chinese word segments
+        '''
+    def segment(self, in_content, in_tagging=True,  space_mark="    "):
+        # print '---------segment-----------'
+        self.wordmap = []
+        self.fullmapping(in_content.decode(self.wordcode))
+        self.precise()
+        return self.tostring(self.wordmap, in_tagging, space_mark)
+
+    def fullmapping(self, in_content):
         __str_len = len(in_content)
         __tagging = 'comb'
         """
@@ -51,7 +105,7 @@ class act (object):
                 __status = dictionary.check(in_content)
                 if __status.get('s') != None:
                     __tagging = __status.get('s')
-                self.string += in_content+"/"+__tagging+"    "
+            self.wordmap.append((in_content, __tagging))
             return
 
         """
@@ -78,11 +132,6 @@ class act (object):
 
         if self.isnumber(__segment_word):
             __tagging = 'm'
-
-        if in_tagging:
-            self.string += __segment_word+"/"+__tagging+space_mark
-        else:
-            self.string += __segment_word+space_mark
-
-        self.fullmapping(in_content[len(__segment_word):__str_len], in_tagging, space_mark)
+        self.wordmap.append((__segment_word, __tagging))
+        self.fullmapping(in_content[len(__segment_word):__str_len])
         pass
